@@ -23,6 +23,8 @@ jobs:
         run: |
           go mod download
           go mod verify
+      - name: Run tests
+        run: go test ./...
       - name: Build
         run: |
           GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
