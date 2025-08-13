@@ -73,8 +73,8 @@ Resources:
     Metadata:
       BuildMethod: go1.x
     Properties:
-      Handler: bootstrap
-      Runtime: provided.al2
+      Handler: main
+      Runtime: go1.x
       CodeUri: .
       Role: !GetAtt LambdaExecutionRole.Arn
       MemorySize: 128
