@@ -47,7 +47,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build
-        run: sam build --template template.yaml --use-container
+        run: sam build --use-container
 
       - name: SAM deploy to dev
         run: |
@@ -76,7 +76,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build
-        run: sam build --template template.yaml --use-container
+        run: sam build --use-container
 
       - name: SAM deploy to prod
         run: |
