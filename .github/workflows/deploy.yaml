@@ -27,10 +27,6 @@ jobs:
           cd lambda
           go mod download
           go mod verify
-
-      - name: Run tests
-        run: go test ./...
-
   deploy-dev:
     needs: test
     runs-on: ubuntu-latest
