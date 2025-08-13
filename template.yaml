@@ -37,7 +37,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub s3-sns-lambda-role-${Environment}
+      RoleName: !Sub wk8-eda-lambda-role-${Environment}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -58,7 +58,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
-                Resource: !Sub arn:aws:s3:::event-sns-bucket-${Environment}/*
+                Resource: !Sub arn:aws:s3:::wk8-eda-${Environment}/*
 
               - Effect: Allow
                 Action:
@@ -80,6 +80,7 @@ Resources:
       Environment:
         Variables:
           SNS_TOPIC_ARN: !Ref NotificationTopic
+          EXPECTED_BUCKET: wk8-eda-topic-${Environment}
       Policies:
         - S3ReadPolicy:
             BucketName: !Sub wk8-eda-${Environment}
