@@ -71,7 +71,7 @@ Resources:
   NotificationLambda:
     Type: AWS::Serverless::Function
     Metadata:
-      BuildMethod: makefile
+      BuildMethod: Makefile
       BuildProperties:
         UseContainer: true
     Properties:

@@ -15,10 +15,6 @@ type Response struct {
 }
 
 func handler(ctx context.Context, s3Event events.S3Event) (Response, error) {
-	// Initialize Gin in release mode
-	//gin.SetMode(gin.ReleaseMode)
-	//r := gin.New()
-
 	// SNS client
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {

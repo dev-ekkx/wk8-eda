@@ -47,10 +47,6 @@ jobs:
           role-to-assume: ${{ env.CFN_EXEC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build Lambda binary
-        run: |
-          GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
-
       - name: SAM build (Go bootstrap)
         run: sam build --template-file template.yaml --use-container
 
@@ -80,10 +76,6 @@ jobs:
         with:
           role-to-assume: ${{ env.CFN_EXEC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Build Lambda binary
-        run: |
-          GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
 
       - name: SAM build (Go bootstrap)
         run: sam build --template-file template.yaml --use-container
