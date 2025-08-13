@@ -24,7 +24,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd lambda
           go mod download
           go mod verify
   deploy-dev:
@@ -49,7 +48,6 @@ jobs:
 
       - name: Build Lambda binary
         run: |
-          cd lambda
           GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
 
       - name: SAM build (Go bootstrap)
@@ -72,7 +70,6 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
-
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
