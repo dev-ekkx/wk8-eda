@@ -72,7 +72,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: bootstrap
-      Runtime: go1.x
+      Runtime: provided.al2
       CodeUri: ./lambda
       Role: !GetAtt LambdaExecutionRole.Arn
       MemorySize: 128
