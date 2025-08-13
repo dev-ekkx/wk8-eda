@@ -95,6 +95,13 @@ Resources:
             Bucket: !Ref UploadBucket
             Events: s3:ObjectCreated:*
 
+  # CloudWatch Lambda function
+  S3NotificationFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/wk8-eda-${Environment}-s3-logs"
+      RetentionInDays: 14
+
 Outputs:
   BucketName:
     Description: Name of the S3 bucket
