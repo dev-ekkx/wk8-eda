@@ -1,0 +1,17 @@
+version = 0.1
+
+[dev.deploy.parameters]
+stack_name = "wk8-eda-dev-stack"
+s3_bucket = "wk8-eda"
+s3_prefix = "dev"
+region = "eu-west-1"
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = "Environment=dev"
+
+[prod.deploy.parameters]
+stack_name = "wk8-eda-prod-stack"
+s3_bucket = "wk8-eda"
+s3_prefix = "prod"
+region = "eu-west-1"
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = "Environment=prod"

@@ -9,6 +9,7 @@ Parameters:
     AllowedValues: [dev, prod]
   NotificationEmail:
     Type: String
+    Default: devekkx@gmail.com
     Description: Email address for SNS notifications
 
 Resources:
@@ -16,7 +17,7 @@ Resources:
   UploadBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub s3-upload-notifications-${Environment}-${AWS::AccountId}
+      BucketName: !Sub wk8-eda-${Environment}
       NotificationConfiguration:
         LambdaConfigurations:
           - Event: s3:ObjectCreated:*
@@ -26,7 +27,7 @@ Resources:
   NotificationTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub s3-upload-notifications-topic-${Environment}
+      TopicName: !Sub wk8-eda-topic-${Environment}
 
   # SNS Subscription
   EmailSubscription:

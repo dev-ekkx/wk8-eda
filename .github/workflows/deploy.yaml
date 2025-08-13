@@ -1,4 +1,4 @@
-name: Deploy Go SAM Application
+name: Deploy Go S3 SAM Notification Application
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-west-1
   GO_VERSION: '1.21'
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
         run: go test ./...
       - name: Build
         run: |
-          GOOS=linux GOARCH=amd64 go build -o bootstrap cmd/lambda/main.go
+          GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
 
   deploy-dev:
     needs: test
@@ -47,7 +47,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build
-        run: sam build
+        run: sam build --template template.yaml --use-container
 
       - name: SAM deploy to dev
         run: |
@@ -76,7 +76,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build
-        run: sam build
+        run: sam build --template template.yaml --use-container
 
       - name: SAM deploy to prod
         run: |
