@@ -45,11 +45,13 @@ jobs:
         run: |
           mkdir -p lambda
           GOOS=linux GOARCH=amd64 go build -o lambda/bootstrap main.go
-      - uses: aws-actions/setup-sam@v2
-      - uses: aws-actions/configure-aws-credentials@v2
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.CFN_EXEC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
+      
       - name: SAM build
         run: sam build --template-file template.yaml
       - name: SAM deploy to dev
