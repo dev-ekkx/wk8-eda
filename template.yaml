@@ -70,10 +70,6 @@ Resources:
   # Lambda Function
   NotificationLambda:
     Type: AWS::Serverless::Function
-    Metadata:
-      BuildMethod: Makefile
-      BuildProperties:
-        UseContainer: true
     Properties:
       Handler: bootstrap
       Runtime: provided.al2
