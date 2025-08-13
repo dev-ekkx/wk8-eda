@@ -91,7 +91,6 @@ jobs:
       - name: Package and deploy SAM to prod
         run: |      
           sam deploy --config-env prod \
-            --template-file packaged-prod.yaml \
             --parameter-overrides Environment=prod NotificationEmail=${{ secrets.PROD_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
