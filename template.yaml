@@ -65,7 +65,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "*"
+                Resource: !Ref S3LogGroups
 
   # Lambda Function
   NotificationLambda:
@@ -96,7 +96,7 @@ Resources:
             Events: s3:ObjectCreated:*
 
   # CloudWatch Lambda function
-  S3NotificationFunctionLogGroup:
+  S3LogGroups:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/lambda/wk8-eda-${Environment}-s3-logs"
