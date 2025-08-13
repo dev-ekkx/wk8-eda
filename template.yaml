@@ -18,10 +18,6 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub wk8-eda-${Environment}
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - Event: s3:ObjectCreated:*
-            Function: !GetAtt NotificationLambda.Arn
 
   # SNS Topic
   NotificationTopic:
@@ -51,9 +47,9 @@ Resources:
           SNS_TOPIC_ARN: !Ref NotificationTopic
       Policies:
         - S3ReadPolicy:
-            BucketName: !Sub s3-upload-notifications-${Environment}-${AWS::AccountId}
+            BucketName: !Sub wk8-eda-${Environment}
         - SNSPublishPolicy:
-            TopicName: !Sub s3-upload-notifications-topic-${Environment}
+            TopicName: !Sub wk8-eda-topic-${Environment}
       Events:
         S3Event:
           Type: S3
