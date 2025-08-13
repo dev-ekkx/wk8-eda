@@ -71,7 +71,9 @@ Resources:
   NotificationLambda:
     Type: AWS::Serverless::Function
     Metadata:
-      BuildMethod: go1.x
+      BuildMethod: makefile
+      BuildProperties:
+        UseContainer: true
     Properties:
       Handler: bootstrap
       Runtime: provided.al2
