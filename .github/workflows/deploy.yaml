@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: eu-west-1
   GO_VERSION: '1.21'
-  CFN_EXEC_ROLE: arn:aws:iam::124355655853:role/sam-cfn
+  CFN_EXEC_ROLE:  arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/sam-cfn
 
 jobs:
   test:

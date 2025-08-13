@@ -53,7 +53,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - sns:Publish
-                Resource: !Ref SNSTopic
+                Resource: !Ref NotificationTopic
 
               - Effect: Allow
                 Action:
