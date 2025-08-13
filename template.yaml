@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Event-Driven S3 Upload Notifications system with Go Lambda
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+  NotificationEmail:
+    Type: String
+    Description: Email address for SNS notifications
+
+Resources:
+  # S3 Bucket
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub s3-upload-notifications-${Environment}-${AWS::AccountId}
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !GetAtt NotificationLambda.Arn
+
+  # SNS Topic
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub s3-upload-notifications-topic-${Environment}
+
+  # SNS Subscription
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn: !Ref NotificationTopic
+      Endpoint: !Ref NotificationEmail
+
+  # Lambda Function
+  NotificationLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: ./lambda
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref NotificationTopic
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Sub s3-upload-notifications-${Environment}-${AWS::AccountId}
+        - SNSPublishPolicy:
+            TopicName: !Sub s3-upload-notifications-topic-${Environment}
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref UploadBucket
+            Events: s3:ObjectCreated:*
+
+  # Lambda Permission for S3
+  LambdaS3Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref NotificationLambda
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !GetAtt UploadBucket.Arn
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket
+    Value: !Ref UploadBucket
+  TopicArn:
+    Description: ARN of the SNS topic
+    Value: !Ref NotificationTopic
+  LambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt NotificationLambda.Arn
