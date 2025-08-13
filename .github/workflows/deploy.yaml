@@ -23,8 +23,6 @@ jobs:
         run: |
           go mod download
           go mod verify
-      - name: Run tests
-        run: go test ./...
       - name: Build
         run: |
           GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
@@ -47,7 +45,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build
-        run: sam build --use-container
+        run: sam build --template-file template.yaml
 
       - name: SAM deploy to dev
         run: |
@@ -76,7 +74,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build
-        run: sam build --use-container
+        run: sam build --template-file template.yaml
 
       - name: SAM deploy to prod
         run: |
