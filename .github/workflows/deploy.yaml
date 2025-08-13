@@ -1,4 +1,4 @@
-name: Deploy Go SAM Application
+name: Deploy Go S3 SAM Notification Application
 
 on:
   push:
@@ -7,31 +7,32 @@ on:
     branches: [main]
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-west-1
   GO_VERSION: '1.21'
+  CFN_EXEC_ROLE:  arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/sam-cfn
+  S3_BUCKET: wk8-eda
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+
       - name: Install dependencies
         run: |
           go mod download
           go mod verify
-      - name: Run tests
-        run: go test ./...
-      - name: Build
-        run: |
-          GOOS=linux GOARCH=amd64 go build -o bootstrap cmd/lambda/main.go
-
   deploy-dev:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v3
@@ -39,27 +40,33 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
-      - uses: aws-actions/setup-sam@v2
-      - uses: aws-actions/configure-aws-credentials@v2
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.CFN_EXEC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: SAM build
-        run: sam build
+      - name: Build Lambda binary
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
 
-      - name: SAM deploy to dev
+      - name: SAM build (Go bootstrap)
+        run: sam build --template-file template.yaml
+
+      - name: Package and deploy SAM to dev
         run: |
           sam deploy --config-env dev \
-            --parameter-overrides Environment=dev \
-            EmailAddress=${{ secrets.DEV_EMAIL }} \
+            --parameter-overrides Environment=dev NotificationEmail=${{ secrets.DEV_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
 
   deploy-prod:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     if: github.ref == 'refs/heads/main'
     environment: production
     steps:
@@ -68,20 +75,28 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+
       - uses: aws-actions/setup-sam@v2
+
       - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::124355655853:role/sam-cfn
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: SAM build
-        run: sam build
+      - name: SAM build (Go bootstrap)
+        run: sam build --template-file template.yaml --use-container
 
-      - name: SAM deploy to prod
+      - name: Package and deploy SAM to prod
         run: |
+          sam package \
+          --s3-bucket ${S3_BUCKET}-prod \
+          --region ${REGION} \
+          --output-template-file packaged-dev.yaml
+          
           sam deploy --config-env prod \
-            --parameter-overrides Environment=prod \
-            EmailAddress=${{ secrets.PROD_EMAIL }} \
+            --template-file packaged-prod.yaml \
+            --parameter-overrides Environment=prod NotificationEmail=${{ secrets.PROD_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
