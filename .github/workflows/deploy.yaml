@@ -10,6 +10,7 @@ env:
   AWS_REGION: eu-west-1
   GO_VERSION: '1.21'
   CFN_EXEC_ROLE:  arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/sam-cfn
+  S3_BUCKET: wk8-eda
 
 jobs:
   test:
@@ -53,9 +54,15 @@ jobs:
       - name: SAM build (Go bootstrap)
         run: sam build --template-file template.yaml
 
-      - name: SAM deploy to dev
+      - name: Package and deploy SAM to dev
         run: |
+          sam package \
+          --s3-bucket ${S3_BUCKET}-dev \
+          --region ${REGION} \
+          --output-template-file packaged-dev.yaml
+          
           sam deploy --config-env dev \
+            --template-file packaged-dev.yaml \
             --parameter-overrides Environment=dev NotificationEmail=${{ secrets.DEV_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
@@ -87,9 +94,15 @@ jobs:
       - name: SAM build (Go bootstrap)
         run: sam build --template-file template.yaml --use-container
 
-      - name: SAM deploy to prod
+      - name: Package and deploy SAM to prod
         run: |
+          sam package \
+          --s3-bucket ${S3_BUCKET}-prod \
+          --region ${REGION} \
+          --output-template-file packaged-dev.yaml
+          
           sam deploy --config-env prod \
+            --template-file packaged-prod.yaml \
             --parameter-overrides Environment=prod NotificationEmail=${{ secrets.PROD_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
