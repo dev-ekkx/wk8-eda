@@ -48,7 +48,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build (Go bootstrap)
-        run: sam build --template-file template.yaml --use-container
+        run: sam build --template-file template.yaml
 
       - name: Package and deploy SAM to dev
         run: |
@@ -78,7 +78,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: SAM build (Go bootstrap)
-        run: sam build --template-file template.yaml --use-container
+        run: sam build --template-file template.yaml
 
       - name: Package and deploy SAM to prod
         run: |      
