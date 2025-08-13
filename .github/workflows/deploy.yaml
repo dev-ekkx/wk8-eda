@@ -76,25 +76,21 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - uses: aws-actions/setup-sam@v2
-
-      - uses: aws-actions/configure-aws-credentials@v2
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-to-assume: arn:aws:iam::124355655853:role/sam-cfn
+          role-to-assume: ${{ env.CFN_EXEC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Build Lambda binary
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
+
       - name: SAM build (Go bootstrap)
-        run: sam build --template-file template.yaml --use-container
+        run: sam build --template-file template.yaml
 
       - name: Package and deploy SAM to prod
-        run: |
-          sam package \
-          --s3-bucket ${S3_BUCKET}-prod \
-          --region ${REGION} \
-          --output-template-file packaged-dev.yaml
-          
+        run: |      
           sam deploy --config-env prod \
             --template-file packaged-prod.yaml \
             --parameter-overrides Environment=prod NotificationEmail=${{ secrets.PROD_EMAIL }} \
