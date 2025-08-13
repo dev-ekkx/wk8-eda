@@ -9,27 +9,26 @@ on:
 env:
   AWS_REGION: eu-west-1
   GO_VERSION: '1.21'
-  CFN_EXEC_ROLE:  arn:aws:iam::124355655853:role/sam-cfn
+  CFN_EXEC_ROLE: arn:aws:iam::124355655853:role/sam-cfn
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+
       - name: Install dependencies
         run: |
           go mod download
           go mod verify
+
       - name: Run tests
         run: go test ./...
-      - name: Build
-        run: |
-          mkdir -p lambda
-          GOOS=linux GOARCH=amd64 go build -o lambda/bootstrap main.go
 
   deploy-dev:
     needs: test
@@ -40,14 +39,11 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Build Lambda binary
-        run: |
-          mkdir -p lambda
-          GOOS=linux GOARCH=amd64 go build -o lambda/bootstrap main.go
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
@@ -55,13 +51,13 @@ jobs:
           role-to-assume: ${{ env.CFN_EXEC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: SAM build
-        run: sam build --template-file template.yaml
+      - name: SAM build (Go bootstrap)
+        run: sam build --template-file template.yaml --use-container
+
       - name: SAM deploy to dev
         run: |
           sam deploy --config-env dev \
-            --parameter-overrides Environment=dev \
-            NotificationEmail=${{ secrets.DEV_EMAIL }} \
+            --parameter-overrides Environment=dev NotificationEmail=${{ secrets.DEV_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
 
@@ -75,27 +71,27 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Build Lambda binary
-        run: |
-          mkdir -p lambda
-          GOOS=linux GOARCH=amd64 go build -o lambda/bootstrap main.go
+
       - uses: aws-actions/setup-sam@v2
+
       - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-to-assume: arn:aws:iam::124355655853:role/sam-cfn
           aws-region: ${{ env.AWS_REGION }}
-      - name: SAM build
-        run: sam build --template-file template.yaml
+
+      - name: SAM build (Go bootstrap)
+        run: sam build --template-file template.yaml --use-container
+
       - name: SAM deploy to prod
         run: |
           sam deploy --config-env prod \
-            --parameter-overrides Environment=prod \
-            NotificationEmail=${{ secrets.PROD_EMAIL }} \
+            --parameter-overrides Environment=prod NotificationEmail=${{ secrets.PROD_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
