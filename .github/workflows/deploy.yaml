@@ -57,7 +57,6 @@ jobs:
       - name: Package and deploy SAM to dev
         run: |
           sam deploy --config-env dev \
-            --template-file packaged-dev.yaml \
             --parameter-overrides Environment=dev NotificationEmail=${{ secrets.DEV_EMAIL }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
