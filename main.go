@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -26,7 +25,7 @@ func handler(ctx context.Context, s3Event events.S3Event) (Response, error) {
 		return Response{Message: "Failed to load AWS config"}, err
 	}
 	snsClient := sns.NewFromConfig(cfg)
-	topicArn := os.Getenv("SNS_TOPIC_ARN")
+	topicArn := "arn:aws:sns:eu-west-1:124355655853:wk8-eda-topic-dev"
 
 	// Process S3 event
 	for _, record := range s3Event.Records {
