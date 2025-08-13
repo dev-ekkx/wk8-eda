@@ -56,11 +56,6 @@ jobs:
 
       - name: Package and deploy SAM to dev
         run: |
-          sam package \
-          --s3-bucket ${S3_BUCKET}-dev \
-          --region ${REGION} \
-          --output-template-file packaged-dev.yaml
-          
           sam deploy --config-env dev \
             --template-file packaged-dev.yaml \
             --parameter-overrides Environment=dev NotificationEmail=${{ secrets.DEV_EMAIL }} \
